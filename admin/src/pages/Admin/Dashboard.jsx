@@ -3,10 +3,7 @@ import { AdminContext } from '../../context/AdminContext';
 import { assets } from '../../assets/assets';
 import { AppContext } from '../../context/AppContext';
 import { LifeLine } from "react-loading-indicators";
-import { Bar, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, PieChart, Pie } from 'recharts';
 
 const Dashboard = () => {
   const { aToken, dashData, getDashData, cancelAppointment } = useContext(AdminContext);
@@ -19,30 +16,36 @@ const Dashboard = () => {
     }
   }, [aToken]);
 
-  // Chart Data Configurations
-  const barChartData = {
-    labels: ['Doctors', 'Appointments', 'Patients'],
-    datasets: [
-      {
-        label: 'Count',
-        data: [dashData?.doctors || 0, dashData?.appointments || 0, dashData?.patients || 0],
-        backgroundColor: ['#32cd32', '#ffcd32', '#32a1cd'],
-        borderColor: ['#2e8b57', '#cc8e00', '#1e5d85'],
-        borderWidth: 1,
-      },
-    ],
+  // Data Configurations for Recharts
+  const colors = ['#0088FE', '#00C49F', '#FFBB28']
+  const barChartData = [
+    { name: 'Doctors', count: dashData?.doctors || 0 },
+    { name: 'Appointments', count: dashData?.appointments || 0 },
+    { name: 'Patients', count: dashData?.patients || 0 },
+  ];
+
+  const pieChartData = [
+    { name: 'Doctors', value: dashData?.doctors || 0 },
+    { name: 'Appointments', value: dashData?.appointments || 0 },
+    { name: 'Patients', value: dashData?.patients || 0 },
+  ];
+
+  // Custom Shape for Bar Chart
+  const getPath = (x, y, width, height) => {
+    return `M${x},${y + height}C${x + width / 3},${y + height} ${x + width / 2},${y + height / 3}
+    ${x + width / 2}, ${y}
+    C${x + width / 2},${y + height / 3} ${x + (2 * width) / 3},${y + height} ${x + width}, ${y + height}
+    Z`;
   };
 
-  const pieChartData = {
-    labels: ['Doctors', 'Appointments', 'Patients'],
-    datasets: [
-      {
-        data: [dashData?.doctors || 0, dashData?.appointments || 0, dashData?.patients || 0],
-        backgroundColor: ['#32cd32', '#ffcd32', '#32a1cd'],
-        hoverOffset: 4,
-      },
-    ],
+  const TriangleBar = (props) => {
+    const { fill, x, y, width, height } = props;
+
+    return <path d={getPath(x, y, width, height)} stroke="none" fill={fill} />;
   };
+
+  // Colors for Pie Chart
+  const COLORS = ['#32cd32', '#ffcd32', '#32a1cd'];
 
   return (
     <div className='m-5 w-3/4'>
@@ -53,21 +56,52 @@ const Dashboard = () => {
       ) : (
         dashData ? (
           <>
-            {/* Bar Chart for Statistics */}
+            {/* Custom Bar Chart for Statistics */}
             <div className='flex flex-col md:flex-row gap-4'>
-              <div className='bg-white p-5 rounded border mb-6'>
+              <div className='bg-white p-2 rounded border mb-6 w-full md:max-w-1/2'>
                 <h3 className='text-center text-gray-600 font-semibold mb-3'>Dashboard Statistics</h3>
-                <Bar data={barChartData} options={{ responsive: true, plugins: { legend: { position: 'top' } } }} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    // width={500}
+                    // height={300}
+                    data={barChartData}
+                    margin={{
+                      top: 20,
+                      right: 20,
+                      left: 0,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis className='text-xs' dataKey="name" />
+                    <YAxis />
+                    <Bar dataKey="count" fill="#8884d8" shape={<TriangleBar />} label={{ position: 'top' }}>
+                      {barChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
 
               {/* Pie Chart for Visualizing Data */}
-              <div className='bg-white p-5 rounded border'>
+              <div className='bg-white p-5 rounded border w-full md:max-w-1/2'>
                 <h3 className='text-center text-gray-600 font-semibold mb-3'>Distribution of Data</h3>
-                <Pie data={pieChartData} options={{ responsive: true }} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8">
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-
+            {/* Latest Bookings Section */}
             <div className='bg-white'>
               <div className='flex items-center gap-2.5 px-4 py-4 mt-10 rounded-t border'>
                 <img src={assets.list_icon} alt="" />
