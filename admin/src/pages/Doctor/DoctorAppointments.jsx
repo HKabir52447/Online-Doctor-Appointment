@@ -1,25 +1,32 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets'
+import { LifeLine } from 'react-loading-indicators'
 
 const DoctorAppointments = () => {
 
   const { dToken, appointments, getAppointments, completeAppointment, cancelAppointment } = useContext(DoctorContext)
-
+  const [loading, setLoading] = useState(true)
   const { calculateAge, slotDateFormat, currency } = useContext(AppContext)
 
   useEffect(() => {
     if (dToken) {
-      getAppointments()
+      getAppointments().then(() => setLoading(false))
     }
   }, [dToken])
 
   return (
     <div className='w-full max-w-6xl m-5'>
-      <p className='mb-3 text-lg font-medium'>All Appointments</p>
+      <p className='mb-3 text-lg font-medium text-center'>All Appointments</p>
 
-      <div className='bg-white border rounded text-sm max-h-[80vh] min-h[50vh] overflow-y-scroll'>
+      {
+        loading ? 
+        (<div className='w-full h-[70vh] flex justify-center items-center'>
+          <LifeLine color="#32cd32" size="large" text="Appointments Loading...." textColor="" />
+        </div>):
+        (
+          <div className='bg-white border rounded text-sm max-h-[80vh] min-h[50vh] overflow-y-scroll'>
         <div className='max-sm:hidden grid grid-cols-[0.5fr_2fr_1fr_1fr_3fr_1fr_1fr] gap-1 py-3 px-6 border-b'>
           <p>#</p>
           <p>Patient</p>
@@ -57,6 +64,8 @@ const DoctorAppointments = () => {
           ))
         }
       </div>
+        )
+      }
     </div>
   )
 }

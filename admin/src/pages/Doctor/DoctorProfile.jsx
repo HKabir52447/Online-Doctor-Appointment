@@ -3,12 +3,14 @@ import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { LifeLine } from 'react-loading-indicators'
 
 const DoctorProfile = () => {
 
   const {dToken, profileData, setProfileData, getProfileData, backendUrl} = useContext(DoctorContext)
   const {currency} = useContext(AppContext)
   const [isEdit, setIsEdit] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const updateProfile = async () =>{
 
@@ -36,9 +38,17 @@ const DoctorProfile = () => {
 
   useEffect(() =>{
     if(dToken){
-      getProfileData()
+      getProfileData().then(() => setLoading(false))
     }
-  }, [dToken])
+  }, [dToken, getProfileData])
+
+  if (loading) {
+    return (
+      <div className='w-full h-[70vh] flex justify-center items-center'>
+          <LifeLine color="#32cd32" size="large" text="Profile Loading...." textColor="#32cd32" />
+        </div>
+    );
+  }
 
   return profileData && (
     <div>

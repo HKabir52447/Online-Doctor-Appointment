@@ -26,8 +26,11 @@ const App = () => {
       <div className='flex items-start'>
         <Sidebar />
         <Routes>
+          {
+            aToken ?  <Route path = '/' element = {<Dashboard />} /> :  <Route path = '/' element = {<DoctorDashboard />} />
+          }
+          
           {/* admin route */}
-          <Route path = '/' element = {<Dashboard />} />
           <Route path = '/admin-dashboard' element = {<Dashboard />} />
           <Route path = '/all-appointments' element = {<AllAppointments />} />
           <Route path = '/add-doctor' element = {<AddDoctor />} />

@@ -16,7 +16,7 @@ const Dashboard = () => {
     }
   }, [aToken]);
 
-  // Data Configurations for Recharts
+  // Data Configurations for Recharts 
   const colors = ['#0088FE', '#00C49F', '#FFBB28']
   const barChartData = [
     { name: 'Doctors', count: dashData?.doctors || 0 },
@@ -51,7 +51,7 @@ const Dashboard = () => {
     <div className='m-5 w-3/4'>
       {loading ? (
         <div className='w-full h-[70vh] flex pl-72 items-center'>
-          <LifeLine color="#32cd32" size="large" text="Doctors Point" textColor="" />
+          <LifeLine color="#32cd32" size="large" text="data loading..." textColor="#32cd32" />
         </div>
       ) : (
         dashData ? (
